@@ -16,12 +16,12 @@ Raw CSV files are ingested into BigQuery via Meltano, transformed into a star sc
 
 | Layer | Tool | Justification |
 |---|---|---|
-| Ingestion | Meltano | Declarative ELT, native BigQuery connector, no custom code |
-| Data Warehouse | BigQuery | Serverless, columnar, scalable for analytics |
-| Transformation | dbt | SQL-based, built-in testing, lineage tracking |
-| Data Quality | Great Expectations + dbt tests | Schema rules (dbt) + business logic checks (GE) |
-| Orchestration | Dagster | Asset-based, clear dependency graph, easy to debug |
-| Analysis | Python, Jupyter, pandas | Standard analytics stack, shareable notebooks |
+| Ingestion | Meltano | Ready-made BigQuery connector, no custom scripts needed |
+| Data Warehouse | BigQuery | No server setup, built for fast analytical queries |
+| Transformation | dbt | Transforms data in SQL, tracks lineage, tests built-in |
+| Data Quality | Great Expectations + dbt tests | dbt handles structural rules, GE handles business logic |
+| Orchestration | Dagster | Runs pipeline daily in correct order, easy to debug |
+| Analysis | Python, Jupyter, pandas | Code, charts, and commentary in one readable notebook |
 
 ---
 
