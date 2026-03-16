@@ -31,3 +31,4 @@ Thumbs.db
 
 # Great Expectations (large auto-generated files)
 great_expectations/uncommitted/
+data_raw/
