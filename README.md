@@ -31,7 +31,7 @@ olist-pipeline/
 ├── olist_dbt/              # dbt project (staging + star schema models)
 │   ├── models/
 │   │   ├── staging/        # 9 staging models cleaning raw tables
-│   │   └── star/            # 6 dimension tables + 3 fact tables
+│   │   └── star/           # 6 dimension tables + 3 fact tables
 │   └── profiles.yml
 ├── dagster_pipeline/       # Dagster assets and daily schedule
 ├── docs/                   # Architecture diagram, GE report, charts
