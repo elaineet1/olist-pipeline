@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.env
+venv/
+.venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# dbt
+olist_dbt/target/
+olist_dbt/dbt_packages/
+olist_dbt/logs/
+
+# Meltano
+.meltano/
+
+# Google Cloud credentials
+*.json
+service_account*.json
+gcp_credentials*.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Great Expectations (large auto-generated files)
+great_expectations/uncommitted/

@@ -1,0 +1,178 @@
+version: 2
+
+models:
+
+  # ─── DIMENSION TABLES ───────────────────────────────────────────────
+
+  - name: dim_customer
+    description: "One row per unique customer. Surrogate key is customer_unique_id."
+    columns:
+      - name: customer_id
+        description: "Primary key - unique per order (not per person)"
+        tests:
+          - unique
+          - not_null
+      - name: customer_unique_id
+        description: "True unique customer identifier"
+        tests:
+          - not_null
+      - name: customer_zip_code_prefix
+        tests:
+          - not_null
+      - name: customer_city
+        tests:
+          - not_null
+      - name: customer_state
+        tests:
+          - not_null
+
+  - name: dim_product
+    description: "One row per product."
+    columns:
+      - name: product_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: product_category_name
+        description: "May be null for uncategorized products - acceptable"
+
+  - name: dim_seller
+    description: "One row per seller."
+    columns:
+      - name: seller_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: seller_zip_code_prefix
+        tests:
+          - not_null
+      - name: seller_city
+        tests:
+          - not_null
+      - name: seller_state
+        tests:
+          - not_null
+
+  - name: dim_date
+    description: "Date dimension generated from order timestamps."
+    columns:
+      - name: date_id
+        description: "Primary key - date in YYYY-MM-DD format"
+        tests:
+          - unique
+          - not_null
+      - name: year
+        tests:
+          - not_null
+      - name: month
+        tests:
+          - not_null
+      - name: day
+        tests:
+          - not_null
+
+  - name: dim_geolocation
+    description: "Zip code to lat/lng mapping."
+    columns:
+      - name: geolocation_zip_code_prefix
+        description: "Primary key - note: may have duplicates in raw, should be deduped in staging"
+        tests:
+          - unique
+          - not_null
+      - name: geolocation_lat
+        tests:
+          - not_null
+      - name: geolocation_lng
+        tests:
+          - not_null
+      - name: geolocation_city
+        tests:
+          - not_null
+      - name: geolocation_state
+        tests:
+          - not_null
+
+  - name: dim_payment_type
+    description: "Lookup table for payment type labels."
+    columns:
+      - name: payment_type
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+          - accepted_values:
+              values: ['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined']
+
+  # ─── FACT TABLES ─────────────────────────────────────────────────────
+
+  - name: fact_orders
+    description: "One row per order with aggregated item-level metrics."
+    columns:
+      - name: order_id
+        description: "Primary key - one row per order"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key to dim_customer"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customer')
+              field: customer_id
+      - name: order_date_id
+        description: "Foreign key to dim_date"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_id
+      - name: total_price
+        tests:
+          - not_null
+      - name: total_freight_value
+        tests:
+          - not_null
+
+  - name: fact_payments
+    description: "One row per payment installment."
+    columns:
+      - name: order_id
+        description: "Foreign key to fact_orders / dim orders"
+        tests:
+          - not_null
+      - name: payment_type
+        description: "Foreign key to dim_payment_type"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_payment_type')
+              field: payment_type
+      - name: payment_value
+        tests:
+          - not_null
+      - name: payment_installments
+        tests:
+          - not_null
+
+  - name: fact_reviews
+    description: "One row per review submitted."
+    columns:
+      - name: review_id
+        description: "Primary key"
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Foreign key linking review to an order"
+        tests:
+          - not_null
+      - name: review_score
+        description: "Rating from 1 to 5"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['1', '2', '3', '4', '5']
+              quote: false

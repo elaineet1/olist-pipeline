@@ -1,0 +1,16 @@
+version: 2
+
+sources:
+  - name: olist_raw
+    database: my-project-001-487905
+    schema: olist_raw
+    tables:
+      - name: olist_customers
+      - name: olist_orders
+      - name: olist_order_items
+      - name: olist_products
+      - name: olist_sellers
+      - name: olist_payments
+      - name: olist_reviews
+      - name: olist_geolocation
+      - name: olist_category_translation

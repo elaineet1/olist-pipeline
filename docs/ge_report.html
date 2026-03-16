@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Great Expectations Report — Olist Pipeline</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f8f9fa; }
+        h1 { color: #343a40; }
+        .summary { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .badge { font-size: 1.5em; font-weight: bold; color: #28a745; }
+        table { width: 100%; border-collapse: collapse; background: #fff;
+                 box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        th { background: #343a40; color: white; padding: 12px; text-align: left; }
+        td { padding: 10px 12px; border-bottom: 1px solid #dee2e6; }
+        tr:hover { background: #f1f3f5; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Great Expectations — Data Quality Report</h1>
+    <div class="summary">
+        <p><strong>Project:</strong> Olist Brazilian E-Commerce Pipeline</p>
+        <p><strong>Generated:</strong> 2026-03-16 11:29:33</p>
+        <p><strong>Result:</strong> <span class="badge">16/16 expectations passed ✅</span></p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>Expectation</th>
+                <th>Parameters</th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            
+        <tr>
+            <td>fact_order_items</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'order_id'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_items</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'product_id'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_items</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'seller_id'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_items</td>
+            <td>expect_column_values_to_be_between</td>
+            <td>{'column': 'price', 'min_value': 0.0}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_items</td>
+            <td>expect_column_values_to_be_between</td>
+            <td>{'column': 'freight_value', 'min_value': 0.0}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_items</td>
+            <td>expect_column_values_to_be_between</td>
+            <td>{'column': 'total_item_amount', 'min_value': 0.0}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_payments</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'order_id'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_payments</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'payment_type'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_payments</td>
+            <td>expect_column_values_to_be_in_set</td>
+            <td>{'column': 'payment_type', 'value_set': ['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined']}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_payments</td>
+            <td>expect_column_values_to_be_between</td>
+            <td>{'column': 'payment_value', 'min_value': 0.0}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_reviews</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'order_id'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_reviews</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'review_score'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>fact_order_reviews</td>
+            <td>expect_column_values_to_be_between</td>
+            <td>{'column': 'review_score', 'min_value': 1.0, 'max_value': 5.0}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>dim_geolocation</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'geolocation_zip_code_prefix'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>dim_geolocation</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'geolocation_city'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        <tr>
+            <td>dim_geolocation</td>
+            <td>expect_column_values_to_not_be_null</td>
+            <td>{'column': 'geolocation_state'}</td>
+            <td style="color:#28a745; font-weight:bold">PASS</td>
+        </tr>
+        </tbody>
+    </table>
+</body>
+</html>
