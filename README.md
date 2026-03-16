@@ -1,51 +1,184 @@
 # Olist E-Commerce Data Pipeline
 
-An end-to-end data engineering pipeline built on the [Brazilian E-Commerce Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce).
+An end-to-end data engineering pipeline built on the [Brazilian E-Commerce Dataset by Olist](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce), covering ingestion, transformation, data quality, analysis, and orchestration.
+
+---
 
 ## Architecture
 
 ![Pipeline Architecture](docs/architecture_diagram.png)
 
+Raw CSV files are ingested into BigQuery via Meltano, transformed into a star schema using dbt, validated with Great Expectations and dbt tests, analysed in Jupyter, and orchestrated end-to-end by Dagster on a daily schedule.
+
+---
+
 ## Tech Stack
 
-| Layer | Tool |
-|---|---|
-| Ingestion | Meltano |
-| Data Warehouse | BigQuery |
-| Transformation | dbt |
-| Data Quality | Great Expectations + dbt tests |
-| Orchestration | Dagster |
-| Analysis | Python, Jupyter, pandas |
+| Layer | Tool | Justification |
+|---|---|---|
+| Ingestion | Meltano | Declarative ELT framework with native BigQuery connector; no custom ingestion code needed |
+| Data Warehouse | BigQuery | Scalable, serverless, columnar storage; ideal for analytical queries on large datasets |
+| Transformation | dbt | SQL-based transformations with built-in testing, documentation, and lineage tracking |
+| Data Quality | Great Expectations + dbt tests | dbt tests cover schema-level rules; Great Expectations covers business logic and statistical checks |
+| Orchestration | Dagster | Asset-based orchestration with clear dependency graph; easier to debug than Airflow for small teams |
+| Analysis | Python, Jupyter, pandas | Standard data science stack; easily shareable notebooks for business stakeholders |
+
+---
 
 ## Project Structure
 ```
 olist-pipeline/
-├── olist_dbt/          # dbt project (staging + star schema models)
-├── dagster_pipeline/   # Dagster assets and schedules
-├── docs/               # Architecture diagram, GE report, charts
+├── olist_dbt/              # dbt project (staging + star schema models)
+│   ├── models/
+│   │   ├── staging/        # 9 staging models cleaning raw tables
+│   │   └── marts/          # 6 dimension tables + 3 fact tables
+│   └── profiles.yml
+├── dagster_pipeline/       # Dagster assets and daily schedule
+├── docs/                   # Architecture diagram, GE report, charts
 ├── great_expectations_checks.py
-├── olist_analysis.ipynb
+├── olist_analysis.ipynb    # EDA and business insights
+├── dbt_test_results.txt    # Full dbt test output
 └── README.md
 ```
 
-## Data Warehouse Datasets
+---
 
-| Dataset | Description |
+## Data Warehouse Design
+
+### Why a Star Schema?
+
+A star schema was chosen over a normalised 3NF schema because:
+- **Query performance** — analysts can join a single fact table to dimension tables without traversing multiple intermediate tables
+- **Simplicity** — the flat structure is easier for business users and BI tools to query
+- **Aggregation** — fact tables store pre-joined keys and measures, making GROUP BY queries fast on BigQuery's columnar engine
+
+### Schema Overview
+
+**Dimension tables** (`olist_dbt_olist_dbt`)
+
+| Table | Description |
 |---|---|
-| olist_raw | Raw ingested tables (9 CSV files) |
-| olist_dbt_olist_staging | Cleaned staging models |
-| olist_dbt_olist_dbt | Star schema (6 dims, 3 facts) |
+| dim_customer | Customer identity and location |
+| dim_product | Product details and category |
+| dim_seller | Seller identity and location |
+| dim_date | Date spine for time-based analysis |
+| dim_geolocation | Zip code to lat/lng mapping |
+| dim_payment_type | Payment method lookup |
+
+**Fact tables** (`olist_dbt_olist_dbt`)
+
+| Table | Description |
+|---|---|
+| fact_orders | Core order-level metrics (price, freight, delivery dates) |
+| fact_payments | Payment transactions per order |
+| fact_reviews | Customer review scores and comments |
+
+---
+
+## Data Lineage
+```
+Raw CSVs (olist_raw)
+    └── Staging models (olist_dbt_olist_staging)
+            ├── stg_orders → fact_orders
+            ├── stg_order_items → fact_orders
+            ├── stg_order_payments → fact_payments
+            ├── stg_order_reviews → fact_reviews
+            ├── stg_customers → dim_customer
+            ├── stg_products → dim_product
+            ├── stg_sellers → dim_seller
+            ├── stg_geolocation → dim_geolocation
+            └── stg_product_category → dim_product
+```
+
+---
 
 ## Data Quality
 
-- **67/67** dbt generic and custom SQL tests passing
-- **16/16** Great Expectations expectations passing
-- Full GE report: `docs/ge_report.html`
+| Check | Tool | Result |
+|---|---|---|
+| Not-null constraints | dbt generic tests | ✅ Passing |
+| Unique key constraints | dbt generic tests | ✅ Passing |
+| Accepted values | dbt generic tests | ✅ Passing |
+| Referential integrity | dbt generic tests | ✅ Passing |
+| No negative payment values | dbt custom SQL | ✅ Passing |
+| No negative order prices | dbt custom SQL | ✅ Passing |
+| Total dbt tests | dbt | ✅ 67/67 passing |
+| Business logic checks | Great Expectations | ✅ 16/16 passing |
+
+### Notable Data Quality Findings
+- 9 zero-value payments found — confirmed legitimate (voucher and undefined payment types)
+- 775 orders with zero total price — confirmed legitimate (orders with no matching item records)
+- No negative values found anywhere in the dataset
+
+Full Great Expectations report: `docs/ge_report.html`
+Full dbt test output: `dbt_test_results.txt`
+
+---
 
 ## Key Findings
 
-- Monthly sales peaked in **November 2017** (Black Friday effect)
-- **Health & Beauty** is the top revenue-generating category
-- **92%** of customers are one-time buyers
-- Average delivery time: **12 days**; SP state fastest at ~8 days
-- **Credit card** dominates at 74% of all payments
+| Insight | Finding |
+|---|---|
+| Sales peak | November 2017 (Black Friday effect) |
+| Top category | Health & Beauty by revenue |
+| Customer behaviour | 92% of customers are one-time buyers |
+| Avg delivery time | 12 days nationally; SP state fastest at ~8 days |
+| Payment method | Credit card dominates at 74% of all payments |
+| Review scores | Average score of 4.1 / 5.0 |
+
+Full analysis with charts: `olist_analysis.ipynb`
+
+---
+
+## BigQuery Datasets
+
+| Dataset | Description |
+|---|---|
+| `olist_raw` | Raw ingested tables (9 CSV files) |
+| `olist_dbt_olist_staging` | Cleaned and typed staging models |
+| `olist_dbt_olist_dbt` | Star schema — dimensions and facts |
+
+---
+
+## How to Run
+
+### Prerequisites
+- WSL Ubuntu with conda `elt` environment
+- Google Cloud project with BigQuery enabled
+- `gcloud` CLI authenticated
+
+### 1. Activate environment
+```bash
+conda activate elt
+cd ~/olist-pipeline
+```
+
+### 2. Run ingestion
+```bash
+cd meltano-olist
+meltano run tap-spreadsheets-anywhere target-bigquery
+```
+
+### 3. Run dbt transformations
+```bash
+cd ~/olist-pipeline/olist_dbt
+dbt build
+```
+
+### 4. Run data quality checks
+```bash
+cd ~/olist-pipeline
+python great_expectations_checks.py
+```
+
+### 5. Run full pipeline via Dagster
+```bash
+cd ~/olist-pipeline/dagster_pipeline
+dagster dev
+```
+
+---
+
+## GCP Project
+
+BigQuery project: `my-project-001-487905`
