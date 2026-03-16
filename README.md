@@ -16,12 +16,12 @@ Raw CSV files are ingested into BigQuery via Meltano, transformed into a star sc
 
 | Layer | Tool | Justification |
 |---|---|---|
-| Ingestion | Meltano | Declarative ELT framework with native BigQuery connector; no custom ingestion code needed |
-| Data Warehouse | BigQuery | Scalable, serverless, columnar storage; ideal for analytical queries on large datasets |
-| Transformation | dbt | SQL-based transformations with built-in testing, documentation, and lineage tracking |
-| Data Quality | Great Expectations + dbt tests | dbt tests cover schema-level rules; Great Expectations covers business logic and statistical checks |
-| Orchestration | Dagster | Asset-based orchestration with clear dependency graph; easier to debug than Airflow for small teams |
-| Analysis | Python, Jupyter, pandas | Standard data science stack; easily shareable notebooks for business stakeholders |
+| Ingestion | Meltano | Declarative ELT, native BigQuery connector, no custom code |
+| Data Warehouse | BigQuery | Serverless, columnar, scalable for analytics |
+| Transformation | dbt | SQL-based, built-in testing, lineage tracking |
+| Data Quality | Great Expectations + dbt tests | Schema rules (dbt) + business logic checks (GE) |
+| Orchestration | Dagster | Asset-based, clear dependency graph, easy to debug |
+| Analysis | Python, Jupyter, pandas | Standard analytics stack, shareable notebooks |
 
 ---
 
@@ -48,8 +48,8 @@ olist-pipeline/
 ### Why a Star Schema?
 
 A star schema was chosen over a normalised 3NF schema because:
-- **Query performance** — analysts can join a single fact table to dimension tables without traversing multiple intermediate tables
-- **Simplicity** — the flat structure is easier for business users and BI tools to query
+- **Query performance** — analysts join a single fact table to dimension tables without traversing multiple intermediate tables
+- **Simplicity** — flat structure is easier for BI tools and business users to query
 - **Aggregation** — fact tables store pre-joined keys and measures, making GROUP BY queries fast on BigQuery's columnar engine
 
 ### Schema Overview
@@ -76,19 +76,12 @@ A star schema was chosen over a normalised 3NF schema because:
 ---
 
 ## Data Lineage
-```
-Raw CSVs (olist_raw)
-    └── Staging models (olist_dbt_olist_staging)
-            ├── stg_orders → fact_orders
-            ├── stg_order_items → fact_orders
-            ├── stg_order_payments → fact_payments
-            ├── stg_order_reviews → fact_reviews
-            ├── stg_customers → dim_customer
-            ├── stg_products → dim_product
-            ├── stg_sellers → dim_seller
-            ├── stg_geolocation → dim_geolocation
-            └── stg_product_category → dim_product
-```
+
+![Data Lineage Graph](docs/lineage_graph.jpg)
+
+Green nodes = raw BigQuery tables (`olist_raw`)
+Teal nodes (middle) = staging models (`olist_dbt_olist_staging`)
+Teal nodes (right) = star schema models (`olist_dbt_olist_dbt`)
 
 ---
 
@@ -106,7 +99,7 @@ Raw CSVs (olist_raw)
 | Business logic checks | Great Expectations | ✅ 16/16 passing |
 
 ### Notable Data Quality Findings
-- 9 zero-value payments found — confirmed legitimate (voucher and undefined payment types)
+- 9 zero-value payments — confirmed legitimate (voucher and undefined payment types)
 - 775 orders with zero total price — confirmed legitimate (orders with no matching item records)
 - No negative values found anywhere in the dataset
 
