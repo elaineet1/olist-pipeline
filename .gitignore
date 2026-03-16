@@ -32,3 +32,6 @@ Thumbs.db
 # Great Expectations (large auto-generated files)
 great_expectations/uncommitted/
 data_raw/
+docs/*.pptx
+docs/lineage_graph.png
+logs/
