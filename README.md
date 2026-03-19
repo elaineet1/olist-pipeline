@@ -174,4 +174,3 @@ dagster dev
 
 ## GCP Project
 
-BigQuery project: `my-project-001-487905`
