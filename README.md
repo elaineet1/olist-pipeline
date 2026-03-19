@@ -172,5 +172,4 @@ dagster dev
 
 ---
 
-## GCP Project
 
