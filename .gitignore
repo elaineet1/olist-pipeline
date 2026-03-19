@@ -35,3 +35,4 @@ data_raw/
 docs/*.pptx
 docs/lineage_graph.png
 logs/
+olist_dbt/.user.yml
